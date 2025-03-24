@@ -1,34 +1,32 @@
-name: Deploy to GitHub Pages
+name: Build and Deploy LaTeX Resume
 
 on:
   push:
     branches:
-      - main  # or 'master' depending on your default branch
+      - main  # or master
 
 permissions:
-  contents: write  # Required to push to gh-pages
+  contents: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'  # or the version you use
+      - name: Install LaTeX
+        run: sudo apt-get update && sudo apt-get install -y texlive-full
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Project
-        run: npm run build
+      - name: Compile LaTeX to PDF
+        run: |
+          pdflatex resume.tex
+          mkdir public
+          mv resume.pdf public/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build  # Replace with your output directory
+          publish_dir: ./public
